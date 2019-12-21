@@ -1,0 +1,51 @@
+
+#!/usr/bin/env groovy
+
+pipeline {
+    agent { label 'build-node' }
+
+    parameters {
+        string(defaultValue: 'riot/master', description: 'RIOT version to build with remote', name: 'RIOT_VERSION', trim: true)
+        string(defaultValue: 'CONNECTED_BOARDS', description: 'List of boards to test', name: 'BOARDS', trim: true)
+    }
+
+    stages {
+        stage("set CONNECTED_BOARDS"){
+            steps{
+                script{
+                    if (params.BOARDS == 'CONNECTED_BOARDS') {
+                        env.BUILD_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
+                    }
+                    else {
+                        env.BUILD_BOARDS = params.BOARDS
+                    }
+                }
+            }
+        }
+        stage('RIOT.git') {
+            steps {
+                build job: 'RIOT.git', parameters: [string(name: 'RIOT_VERSION', value: String.valueOf(RIOT_VERSION))]
+            }
+        }
+        stage('build-boards') {
+            stages {
+                stage ('job build-clean') {
+                    steps {
+                        build 'build-clean'
+                    }
+                }
+                stage ('job build-boards') {
+                    steps {
+                        echo "Building for BOARD's: ${BUILD_BOARDS}"
+                        build job: 'build-boards', parameters: [string(name: 'BOARDS', value: String.valueOf(BUILD_BOARDS )), string(name: 'RIOT_VERSION', value: String.valueOf(RIOT_VERSION))]
+                    }
+                }
+                stage ('job build-results') {
+                    steps {
+                        build 'build-results'
+                    }
+                }
+            }
+        }
+    }
+}
