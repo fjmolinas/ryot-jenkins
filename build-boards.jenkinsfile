@@ -40,6 +40,7 @@ pipeline {
                         stage ("build-${board}") {
                             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 build job: 'build-board.jk',
+                                    propagate: false
                                     parameters: [
                                         string (
                                             name: 'BOARDS',
