@@ -77,6 +77,11 @@ pipeline {
                 done > failuresummary.md
                 cat failuresummary.md'''
             }
+            post {
+                always {
+                    archiveArtifacts artifacts: '**'
+                }
+            }
         }
     }
 }
