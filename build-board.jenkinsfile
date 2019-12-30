@@ -1,0 +1,35 @@
+pipeline {
+    agent { label 'build-node' }
+
+    parameters {
+        string (
+            defaultValue: 'unkown',
+            description: 'RIOT version identifier default \'unknown\'',
+            name: 'RIOT_VERSION',
+            trim: true
+        )
+        string (
+            defaultValue: 'nucleo-l152re',
+            description: 'List of boards to test',
+            name: 'BOARD',
+            trim: true
+        )
+        string (
+            defaultValue: ' --clean-after --with-test-only -j0',
+            description: 'args for compile_and_test_for_board script',
+            name: 'COMPILE_AND_TEST_ARGS'
+        )
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                lock("${params.BOARD}" as String) {
+                    sh label: '', script: """RIOT=/builds/workspace/RIOT.git
+                    COMPILE_AND_TEST=\${RIOT}/dist/tools/compile_and_test_for_board/compile_and_test_for_board.py
+                    BUILD_IN_DOCKER=1 \${COMPILE_AND_TEST} \${RIOT} ${BOARD} . ${COMPILE_AND_TEST_ARGS}"""
+                }
+            }
+        }
+    }
+}
