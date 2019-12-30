@@ -1,0 +1,60 @@
+pipeline {
+    agent { label 'build-node' }
+
+    parameters {
+        string (
+            defaultValue: 'CONNECTED_BOARDS',
+            description: 'List of boards to test',
+            name: 'BOARDS',
+            trim: true
+        )
+        string (
+            defaultValue: 'riot/master',
+            description: 'RIOT version to build with remote',
+            name: 'RIOT_VERSION',
+            trim: true
+        )
+        string (
+            defaultValue: ' --clean-after --with-test-only -j0',
+            description: 'args for compile_and_test_for_board script',
+            name: 'COMPILE_AND_TEST_ARGS'
+        )
+    }
+
+    stages {
+        stage("set CONNECTED_BOARDS"){
+            steps{
+                script{
+                    if (params.BOARDS == 'CONNECTED_BOARDS') {
+                        env.BUILD_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
+                    } else {
+                        env.BUILD_BOARDS = params.BOARDS
+                    }
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                script {
+                    for (board in env.BUILD_BOARDS.split()) {
+                        stage ("build-${board}") {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                build job: 'build-board.jk',
+                                    parameters: [
+                                        string (
+                                            name: 'BOARDS',
+                                            value: String.valueOf(env.BUILD_BOARDS)
+                                        ),
+                                        string (
+                                            name: 'RIOT_VERSION',
+                                            value: String.valueOf(env.RIOT_VERSION)
+                                        )
+                                    ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
