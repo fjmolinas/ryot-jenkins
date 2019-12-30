@@ -1,12 +1,24 @@
-
-#!/usr/bin/env groovy
-
 pipeline {
     agent { label 'build-node' }
 
     parameters {
-        string(defaultValue: 'riot/master', description: 'RIOT version to build with remote', name: 'RIOT_VERSION', trim: true)
-        string(defaultValue: 'CONNECTED_BOARDS', description: 'List of boards to test', name: 'BOARDS', trim: true)
+        string (
+            defaultValue: 'riot/master',
+            description: 'RIOT version to build with remote',
+            name: 'RIOT_VERSION',
+            trim: true
+        )
+        string (
+            defaultValue: 'CONNECTED_BOARDS',
+            description: 'List of boards to test',
+            name: 'BOARDS',
+            trim: true
+        )
+        string (
+            defaultValue: ' --clean-after --with-test-only -j0',
+            description: 'args for compile_and_test_for_board script',
+            name: 'COMPILE_AND_TEST_ARGS'
+        )
     }
 
     stages {
@@ -15,8 +27,7 @@ pipeline {
                 script{
                     if (params.BOARDS == 'CONNECTED_BOARDS') {
                         env.BUILD_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
-                    }
-                    else {
+                    } else {
                         env.BUILD_BOARDS = params.BOARDS
                     }
                 }
@@ -24,27 +35,47 @@ pipeline {
         }
         stage('RIOT.git') {
             steps {
-                build job: 'RIOT.git', parameters: [string(name: 'RIOT_VERSION', value: String.valueOf(RIOT_VERSION))]
+                build job: 'RIOT.git',
+                    parameters: [
+                        string ( 
+                            name: 'RIOT_VERSION',
+                            value: String.valueOf(env.RIOT_VERSION)
+                        )
+                    ]
             }
         }
-        stage('build-boards') {
-            stages {
-                stage ('job build-clean') {
-                    steps {
-                        build 'build-clean'
-                    }
-                }
-                stage ('job build-boards') {
-                    steps {
-                        echo "Building for BOARD's: ${BUILD_BOARDS}"
-                        build job: 'build-boards', parameters: [string(name: 'BOARDS', value: String.valueOf(BUILD_BOARDS )), string(name: 'RIOT_VERSION', value: String.valueOf(RIOT_VERSION))]
-                    }
-                }
-                stage ('job build-results') {
-                    steps {
-                        build 'build-results'
-                    }
-                }
+        stage ('build-clean') {
+            steps {
+                sh "rm -rf -- *"
+            }
+        }
+        stage ('build-boards') {
+            steps {
+                build job: 'build-boards.jk',
+                parameters: [
+                    string (
+                        name: 'BOARDS',
+                        value: String.valueOf(env.BUILD_BOARDS)
+                    ),
+                    string (
+                        name: 'RIOT_VERSION',
+                        value: String.valueOf(env.RIOT_VERSION)
+                    ),
+                    string (
+                        name: 'COMPILE_AND_TEST_ARGS',
+                        value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
+                    )
+                ]
+            }
+        }
+        stage ('build-results') {
+            steps {
+                sh label: '', script: '''BUILD_DIR=/builds/workspace/build
+                for summary in ${BUILD_DIR}/*/failuresummary.md; do
+                printf "#### ${summary}\\n\\n"
+                cat ${summary}; printf \'\\n\'
+                done > failuresummary.md
+                cat failuresummary.md'''
             }
         }
     }
