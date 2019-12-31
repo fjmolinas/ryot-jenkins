@@ -37,6 +37,11 @@ pipeline {
             steps {
                 build job: 'RIOT.git',
                     parameters: [
+                        [
+                            $class: 'LabelParameterValue',
+                            name: 'node',
+                            label: 'build-node'
+                        ],
                         string ( 
                             name: 'RIOT_VERSION',
                             value: String.valueOf(env.RIOT_VERSION)
@@ -52,20 +57,25 @@ pipeline {
         stage ('build-boards') {
             steps {
                 build job: 'build-boards.jk',
-                parameters: [
-                    string (
-                        name: 'BOARDS',
-                        value: String.valueOf(env.BUILD_BOARDS)
-                    ),
-                    string (
-                        name: 'RIOT_VERSION',
-                        value: String.valueOf(env.RIOT_VERSION)
-                    ),
-                    string (
-                        name: 'COMPILE_AND_TEST_ARGS',
-                        value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
-                    )
-                ]
+                    parameters: [
+                        [
+                            $class: 'LabelParameterValue',
+                            name: 'node',
+                            label: 'build-node'
+                        ],
+                        string (
+                            name: 'BOARDS',
+                            value: String.valueOf(env.BUILD_BOARDS)
+                        ),
+                        string (
+                            name: 'RIOT_VERSION',
+                            value: String.valueOf(env.RIOT_VERSION)
+                        ),
+                        string (
+                            name: 'COMPILE_AND_TEST_ARGS',
+                            value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
+                        )
+                    ]
             }
         }
         stage ('build-results') {

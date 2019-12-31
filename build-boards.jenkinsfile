@@ -40,8 +40,13 @@ pipeline {
                         stage ("build-${board}") {
                             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                 build job: 'build-board.jk',
-                                    propagate: false
+                                    propagate: false,
                                     parameters: [
+                                        [
+                                            $class: 'LabelParameterValue',
+                                            name: 'node',
+                                            label: 'build-node'
+                                        ],
                                         string (
                                             name: 'BOARDS',
                                             value: String.valueOf(env.BUILD_BOARDS)
