@@ -48,12 +48,16 @@ pipeline {
                                             label: 'build-node'
                                         ],
                                         string (
-                                            name: 'BOARDS',
-                                            value: String.valueOf(env.BUILD_BOARDS)
+                                            name: 'BOARD',
+                                            value: String.valueOf(board)
                                         ),
                                         string (
                                             name: 'RIOT_VERSION',
                                             value: String.valueOf(env.RIOT_VERSION)
+                                        ),
+                                        string (
+                                            name: 'COMPILE_AND_TEST_ARGS',
+                                            value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
                                         )
                                     ]
                             }
