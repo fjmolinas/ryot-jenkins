@@ -80,7 +80,7 @@ pipeline {
         }
         stage ('build-results') {
             steps {
-                sh label: '', script: '''BUILD_DIR=/builds/workspace/build
+                sh label: '', script: '''BUILD_DIR=/builds/workspace/build-board.jk
                 for summary in ${BUILD_DIR}/*/failuresummary.md; do
                 printf "#### ${summary}\\n\\n"
                 cat ${summary}; printf \'\\n\'
