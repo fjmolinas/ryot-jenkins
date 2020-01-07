@@ -1,5 +1,10 @@
 pipeline {
-    agent { label 'build-node' }
+    agent  {
+        label {
+            label 'build-node'
+            customWorkspace "workspace/results/build"
+        }
+    }
 
     parameters {
         string (
