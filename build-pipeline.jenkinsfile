@@ -80,16 +80,20 @@ pipeline {
         }
         stage ('build-results') {
             steps {
-                sh label: '', script: '''BUILD_DIR=/builds/workspace/build-board.jk
-                for summary in ${BUILD_DIR}/*/failuresummary.md; do
-                printf "#### ${summary}\\n\\n"
-                cat ${summary}; printf \'\\n\'
-                done > failuresummary.md
-                cat failuresummary.md'''
+                ws("workspace/results/build") {
+                    sh label: '', script: '''
+                    for summary in */failuresummary.md; do
+                    printf "#### ${summary}\\n\\n"
+                    cat ${summary}; printf \'\\n\'
+                    done > failuresummary.md
+                    cat failuresummary.md'''
+                }
             }
             post {
                 always {
-                    archiveArtifacts artifacts: '**'
+                    ws("workspace/results/build") {
+                        archiveArtifacts artifacts: '**'
+                    }
                 }
             }
         }
