@@ -94,6 +94,7 @@ pipeline {
                     ws("workspace/results/build") {
                         archiveArtifacts artifacts: '**'
                     }
+                    cleanWs deleteDirs: true, patterns: [[pattern: '/builds/workspace/results/build', type: 'INCLUDE']]
                 }
             }
         }
