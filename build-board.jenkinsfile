@@ -33,7 +33,7 @@ pipeline {
                     currentBuild.displayName = "${currentBuild.number}-${params.BOARD}-${params.RIOT_VERSION}"
                 }
                 lock("${params.BOARD}" as String) {
-                    sh label: '', script: """RIOT=/builds/workspace/RIOT.git
+                    sh label: '', script: """RIOT=/builds/boards/RIOT
                     COMPILE_AND_TEST=\${RIOT}/dist/tools/compile_and_test_for_board/compile_and_test_for_board.py
                     BUILD_IN_DOCKER=1 \${COMPILE_AND_TEST} \${RIOT} ${BOARD} . ${COMPILE_AND_TEST_ARGS}"""
                 }
