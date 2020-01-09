@@ -82,19 +82,16 @@ pipeline {
             steps {
                 ws("workspace/results/build") {
                     sh label: '', script: '''
-                    for summary in */failuresummary.md; do
-                    printf "#### ${summary}\\n\\n"
-                    cat ${summary}; printf \'\\n\'
-                    done > failuresummary.md
-                    cat failuresummary.md'''
+                    python /builds/scripts/ci_aggregate.py .
+                    '''
                 }
             }
             post {
                 always {
                     ws("workspace/results/build") {
                         archiveArtifacts artifacts: '**'
+                        cleanWs()
                     }
-                    cleanWs deleteDirs: true, patterns: [[pattern: '/builds/workspace/results/build', type: 'INCLUDE']]
                 }
             }
         }
