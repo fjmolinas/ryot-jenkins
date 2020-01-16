@@ -54,7 +54,9 @@ pipeline {
         }
         stage ('build-clean') {
             steps {
-                sh "rm -rf -- *"
+                ws("workspace/results/build") {
+                    sh "rm -rf -- *"
+                }
             }
         }
         stage ('build-boards') {
