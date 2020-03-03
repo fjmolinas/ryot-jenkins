@@ -16,11 +16,16 @@ pipeline {
         )
         string (
             defaultValue: ' --with-test-only --incremental -j0',
-            description: '''args for compile_and_test_for_board script
-                         To pass USEMODULE and CFLAGS use: 
-                         DOCKER_ENVIRONMENT_CMDLINE=$\'-e USEMODULE+=<name>\'
-                         DOCKER_ENVIRONMENT_CMDLINE=$\'-e CFLAGS=-D<flag>\'''',
+            description: '''args for compile_and_test_for_board script''',
             name: 'COMPILE_AND_TEST_ARGS'
+        )
+        string (
+            defaultValue: '',
+            description: '''environment vars for compile_and_test_for_board script
+                         To pass USEMODULE and CFLAGS use:
+                         DOCKER_ENVIRONMENT_CMDLINE=\'-e USEMODULE=<name>\'
+                         DOCKER_ENVIRONMENT_CMDLINE=\'-e CFLAGS=-D<flag>\'''',
+            name: 'COMPILE_AND_TEST_VARS'
         )
     }
 
@@ -61,6 +66,10 @@ pipeline {
                                         string (
                                             name: 'COMPILE_AND_TEST_ARGS',
                                             value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
+                                        ),
+                                        string (
+                                            name: 'COMPILE_AND_TEST_VARS',
+                                            value: String.valueOf(env.COMPILE_AND_TEST_VARS)
                                         )
                                     ]
                             }
