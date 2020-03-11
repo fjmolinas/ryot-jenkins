@@ -30,8 +30,11 @@ pipeline {
     }
 
     stages {
-        stage("set CONNECTED_BOARDS"){
+        stage("setup"){
             steps{
+                script {
+                    currentBuild.displayName = "${currentBuild.number}-${params.RIOT_VERSION}"
+                }
                 script{
                     if (params.BOARDS == 'CONNECTED_BOARDS') {
                         env.BUILD_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
