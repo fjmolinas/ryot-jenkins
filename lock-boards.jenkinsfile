@@ -1,0 +1,58 @@
+pipeline {
+    agent  {
+        label {
+            label 'lock-node'
+        }
+    }
+
+
+    parameters {
+        string(
+            defaultValue: 'CONNECTED_BOARDS',
+            description: 'List of boards to lock',
+            name: 'BOARDS',
+            trim: true
+        )
+        string(
+            defaultValue: '60',
+            description: 'Reservation duration in minutes',
+            name: 'DURATION',
+            trim: true
+        )
+    }
+
+    stages {
+        stage("Lock BOARDS"){
+            steps{
+                script{
+                    if (params.BOARDS == 'CONNECTED_BOARDS') {
+                        env.LOCKED_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
+                    }
+                    else {
+                        env.LOCKED_BOARDS = params.BOARDS
+                    }
+                    def resources = "${env.LOCKED_BOARDS}".split()
+                    lockResources(resources, {
+                        sh 'echo "${LOCKED_BOARDS}" > lock'
+                        sleep(time:params.DURATION.toInteger(),unit:"MINUTES")
+                    })
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
+
+def lockResources(listOfResources, closure) {
+    if (listOfResources.size() > 1) {
+        lockResources(listOfResources[1..-1],
+            { lock(listOfResources[0]) { closure() }})
+    } else {
+        lock(listOfResources[0]) { closure() }
+    }
+}
