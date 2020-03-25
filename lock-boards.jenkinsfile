@@ -24,6 +24,11 @@ pipeline {
     stages {
         stage("Lock BOARDS"){
             steps{
+                script {
+                    wrap([$class: 'BuildUser']) {
+                        currentBuild.displayName = "${currentBuild.number}-${BUILD_USER}-${params.DURATION}"
+                    }
+                }
                 script{
                     if (params.BOARDS == 'CONNECTED_BOARDS') {
                         env.LOCKED_BOARDS = sh(script: "make -C /builds/boards/ list-boards --no-print-directory", returnStdout: true).trim()
