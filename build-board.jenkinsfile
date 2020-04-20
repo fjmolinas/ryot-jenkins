@@ -20,7 +20,7 @@ pipeline {
             trim: true
         )
         string (
-            defaultValue: '--with-test-only --incremental -j0',
+            defaultValue: ' --with-test-only  --incremental --clean-after -j0',
             description: '''args for compile_and_test_for_board script''',
             name: 'COMPILE_AND_TEST_ARGS'
         )
