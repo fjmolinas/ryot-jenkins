@@ -40,7 +40,7 @@ pipeline {
                 script {
                     currentBuild.displayName = "${currentBuild.number}-${params.BOARD}-${params.RIOT_VERSION}"
                 }
-                lock("${params.BOARD}" as String) {
+                lock(resource: "${params.BOARD}" as String, skipIfLocked: true) {
                     sh label: '', script: """
                     RIOT_TOOL=/builds/boards/RIOT
                     RIOTBASE=/builds/workspace/RIOT.git/
