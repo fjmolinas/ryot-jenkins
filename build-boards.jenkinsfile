@@ -47,37 +47,42 @@ pipeline {
         stage('build') {
             steps {
                 script {
+                    def branches = [:]
                     for (board in env.BUILD_BOARDS.split()) {
-                        stage ("build-${board}") {
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                build job: 'build-board.jk',
-                                    propagate: false,
-                                    parameters: [
-                                        [
-                                            $class: 'LabelParameterValue',
-                                            name: 'node',
-                                            label: 'build-node'
-                                        ],
-                                        string (
-                                            name: 'BOARD',
-                                            value: String.valueOf(board)
-                                        ),
-                                        string (
-                                            name: 'RIOT_VERSION',
-                                            value: String.valueOf(env.RIOT_VERSION)
-                                        ),
-                                        string (
-                                            name: 'COMPILE_AND_TEST_ARGS',
-                                            value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
-                                        ),
-                                        string (
-                                            name: 'COMPILE_AND_TEST_VARS',
-                                            value: String.valueOf(env.COMPILE_AND_TEST_VARS)
-                                        )
-                                    ]
+                        def name = board
+                        branches["${name}"] = {
+                            stage ("build-${name}") {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    build job: 'build-board.jk',
+                                        propagate: false,
+                                        parameters: [
+                                            [
+                                                $class: 'LabelParameterValue',
+                                                name: 'node',
+                                                label: 'build-node'
+                                            ],
+                                            string (
+                                                name: 'BOARD',
+                                                value: String.valueOf(name)
+                                            ),
+                                            string (
+                                                name: 'RIOT_VERSION',
+                                                value: String.valueOf(env.RIOT_VERSION)
+                                            ),
+                                            string (
+                                                name: 'COMPILE_AND_TEST_ARGS',
+                                                value: String.valueOf(env.COMPILE_AND_TEST_ARGS)
+                                            ),
+                                            string (
+                                                name: 'COMPILE_AND_TEST_VARS',
+                                                value: String.valueOf(env.COMPILE_AND_TEST_VARS)
+                                            )
+                                        ]
+                                }
                             }
                         }
                     }
+                    parallel branches
                 }
             }
         }
