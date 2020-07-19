@@ -62,7 +62,7 @@ pipeline {
         }
         stage ('build-clean') {
             steps {
-                ws("workspace/results/build") {
+                ws("workspace/results/") {
                     sh "rm -rf -- *"
                 }
             }
@@ -97,6 +97,9 @@ pipeline {
         }
         stage ('build-results') {
             steps {
+                ws("workspace/results/") {
+                    sh "cp -ru build@*/* build/"
+                }
                 ws("workspace/results/build") {
                     sh label: '', script: '''
                     python /builds/scripts/ci_aggregate.py .
