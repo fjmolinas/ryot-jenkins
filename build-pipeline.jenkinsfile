@@ -15,7 +15,7 @@ pipeline {
             trim: true
         )
         string (
-            defaultValue: ' --with-test-only  --incremental --clean-after',
+            defaultValue: ' --with-test-only  --incremental',
             description: '''args for compile_and_test_for_board script''',
             name: 'COMPILE_AND_TEST_ARGS'
         )
