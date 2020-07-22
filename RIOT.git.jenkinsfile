@@ -1,0 +1,50 @@
+pipeline {
+    agent  {
+        label {
+            label 'build-node'
+        }
+    }
+
+    parameters {
+        string(
+            defaultValue: 'riot/master',
+            description: 'Name of the branch to be built',
+            name: 'RIOT_VERSION',
+            trim: true
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm: [
+                    $class: 'GitSCM',
+                    branches: [[name: "${params.RIOT_VERSION}"]],
+                    extensions: [[$class: 'CleanCheckout']],
+                    userRemoteConfigs: [
+                        [
+                            url: 'https://github.com/RIOT-OS/RIOT.git',
+                            name: 'riot',
+                            refspec: '''+refs/pull/*/head:refs/remotes/riot/pr/*
+                                        +refs/heads/*:refs/remotes/riot/*
+                                        +refs/tags/*:refs/riot/*'''
+                        ],
+                        [
+                            url: 'https://github.com/fjmolinas/RIOT.git',
+                            name: 'fjmolinas',
+                        ],
+                    ]
+
+                ]
+            }
+        }
+    }
+
+    post {
+        always {
+            /* Also remove cloned packages as they are not removed by
+              `Clean after checkout` */
+            sh 'git clean -xdff'
+        }
+    }
+}

@@ -46,7 +46,7 @@ pipeline {
         }
         stage('RIOT.git') {
             steps {
-                build job: 'RIOT.git',
+                build job: 'RIOT.git.jk',
                     parameters: [
                         [
                             $class: 'LabelParameterValue',

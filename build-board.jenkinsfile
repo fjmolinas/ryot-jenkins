@@ -43,7 +43,7 @@ pipeline {
                 lock(resource: "${params.BOARD}" as String, skipIfLocked: true) {
                     sh label: '', script: """
                     RIOT_TOOL=/builds/boards/RIOT
-                    RIOTBASE=/builds/workspace/RIOT.git/
+                    RIOTBASE=/builds/workspace/RIOT.git.jk/
                     COMPILE_AND_TEST=\${RIOT_TOOL}/dist/tools/compile_and_test_for_board/compile_and_test_for_board.py
                     ${COMPILE_AND_TEST_VARS} BUILD_IN_DOCKER=1 \${COMPILE_AND_TEST} \${RIOTBASE} ${BOARD} . ${COMPILE_AND_TEST_ARGS}
                     """
