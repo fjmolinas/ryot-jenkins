@@ -98,7 +98,7 @@ pipeline {
         stage ('build-results') {
             steps {
                 ws("workspace/results/") {
-                    sh "cp -ru build@*/* build/"
+                    sh "cp -ru build@*/* build/ || true"
                 }
                 ws("workspace/results/build") {
                     sh label: '', script: '''
@@ -117,3 +117,4 @@ pipeline {
         }
     }
 }
+
